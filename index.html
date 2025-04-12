@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Business Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 font-['Poppins']">
+    <!-- Login Form -->
+    <div id="loginForm" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Login</h3>
+            <form onsubmit="event.preventDefault(); login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value)" class="space-y-4">
+                <div id="loginError" class="text-red-500 text-sm hidden"></div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="loginEmail" class="w-full border rounded-lg px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="loginPassword" class="w-full border rounded-lg px-3 py-2" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg">Login</button>
+                <button type="button" onclick="showRegisterForm()" class="w-full bg-gray-200 text-gray-700 py-2 rounded-lg">Don't have an account? Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Form -->
+    <div id="registerForm" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h3 class="text-xl font-semibold mb-4">Register</h3>
+            <form onsubmit="event.preventDefault(); register()" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">Name</label>
+                    <input type="text" id="registerName" class="w-full border rounded-lg px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="registerEmail" class="w-full border rounded-lg px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="registerPassword" class="w-full border rounded-lg px-3 py-2" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg">Register</button>
+                <button type="button" onclick="showLoginForm()" class="w-full bg-gray-200 text-gray-700 py-2 rounded-lg">Already have an account? Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="min-h-screen">
+        <!-- Navigation -->
+        <nav class="bg-blue-600 text-white p-4">
+            <div class="container mx-auto flex justify-between items-center">
+                <h1 class="text-2xl font-bold">Vyapar Pro</h1>
+                <div class="flex items-center space-x-4">
+                    <button id="toggleTheme" class="p-2"><i class="bi bi-moon-stars"></i></button>
+                    <div class="relative" id="userMenu">
+                        <button class="flex items-center space-x-2" onclick="toggleUserMenu()">
+                            <i class="bi bi-person-circle text-xl"></i>
+                            <span id="userName">User</span>
+                        </button>
+                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+                            <button onclick="showBusinessSetup()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Business Setup</button>
+                            <button onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container mx-auto p-4">
+            <!-- Business Setup Modal -->
+            <div id="businessSetupModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+                <div class="bg-white rounded-lg p-8 max-w-md w-full">
+                    <h3 class="text-xl font-semibold mb-4">Business Setup</h3>
+                    <form id="businessSetupForm" class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">Business Name</label>
+                            <input type="text" id="businessName" class="w-full border rounded-lg px-3 py-2" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">GST Number</label>
+                            <input type="text" id="gstNumber" class="w-full border rounded-lg px-3 py-2" required pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">Business Address</label>
+                            <textarea id="businessAddress" class="w-full border rounded-lg px-3 py-2" required></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg">Save Business Details</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-gray-600 mb-2">Total Revenue</h3>
+                    <p class="text-2xl font-bold" id="totalRevenue">₹0.00</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-gray-600 mb-2">Outstanding Amount</h3>
+                    <p class="text-2xl font-bold" id="outstandingAmount">₹0.00</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-gray-600 mb-2">GST Payable</h3>
+                    <p class="text-2xl font-bold" id="gstPayable">₹0.00</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-gray-600 mb-2">Total Expenses</h3>
+                    <p class="text-2xl font-bold" id="totalExpenses">₹0.00</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mb-6">
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="showModal('invoice')" class="bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                        <i class="bi bi-plus-lg"></i> New Invoice
+                    </button>
+                    <button onclick="showModal('receipt')" class="bg-green-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                        <i class="bi bi-receipt"></i> New Receipt
+                    </button>
+                    <button onclick="showModal('expense')" class="bg-red-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                        <i class="bi bi-cash"></i> Add Expense
+                    </button>
+                    <button onclick="showGSTReport()" class="bg-purple-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                        <i class="bi bi-file-earmark-text"></i> GST Report
+                    </button>
+                    <button onclick="showSalesReport()" class="bg-blue-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                        <i class="bi bi-graph-up"></i> Sales Report
+                    </button>
+                    <button onclick="showGSTAdvisor()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                        <i class="bi bi-lightbulb"></i> GST Advisor
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Recent Transactions</h2>
+                    <ul id="transactionHistory" class="list-none space-y-2"></ul>
+                    <div class="flex gap-2">
+                        <input type="text" id="searchTransaction" placeholder="Search transactions..." class="border rounded-lg px-3 py-1">
+                        <select id="filterStatus" class="border rounded-lg px-3 py-1">
+                            <option value="all">All Status</option>
+                            <option value="paid">Paid</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full" id="transactionsTable">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Party Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">GST</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="transactionsList">
+                            <!-- Rows will be populated dynamically, but each row will have this structure -->
+                            <tr>
+                                <td class="px-6 py-4">${new Date(transaction.createdAt).toLocaleDateString()}</td>
+                                <td class="px-6 py-4">${transaction.type}</td>
+                                <td class="px-6 py-4">${transaction.partyName}</td>
+                                <td class="px-6 py-4">₹${transaction.amount.toFixed(2)}</td>
+                                <td class="px-6 py-4">₹${transaction.gstAmount.toFixed(2)}</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-2 py-1 rounded ${transaction.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                        ${transaction.status}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 space-x-2">
+                                    ${transaction.type === 'invoice' ? 
+                                        `<button onclick="downloadInvoice('${transaction._id}')" 
+                                            class="text-blue-600 hover:text-blue-900">
+                                            <i class="bi bi-download"></i> Invoice
+                                        </button>` : 
+                                        ''
+                                    }
+                                    ${transaction.status === 'pending' && transaction.type !== 'expense' ? 
+                                        `<button onclick="initiatePayment('${transaction._id}')" 
+                                            class="text-green-600 hover:text-green-900">
+                                            <i class="bi bi-credit-card"></i> Pay Now
+                                        </button>` : 
+                                        ''
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transactionModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold" id="modalTitle">New Transaction</h3>
+                <button onclick="hideModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <form id="transactionForm" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">Party Name</label>
+                    <input type="text" id="partyName" class="w-full border rounded-lg px-3 py-2" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Party GST Number</label>
+                    <input type="text" id="partyGST" class="w-full border rounded-lg px-3 py-2" pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Amount (₹)</label>
+                    <input type="number" id="amount" class="w-full border rounded-lg px-3 py-2" required min="0" step="0.01">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">GST Rate (%)</label>
+                    <select id="gstRate" class="w-full border rounded-lg px-3 py-2">
+                        <option value="0">0%</option>
+                        <option value="5">5%</option>
+                        <option value="12">12%</option>
+                        <option value="18">18%</option>
+                        <option value="28">28%</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Due Date</label>
+                    <input type="date" id="dueDate" class="w-full border rounded-lg px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Notes</label>
+                    <textarea id="notes" class="w-full border rounded-lg px-3 py-2"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg">Save Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- GST Report Modal -->
+    <div id="gstReportModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white rounded-lg p-8 max-w-4xl w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">GST Report</h3>
+                <button onclick="hideGSTReport()" class="text-gray-500 hover:text-gray-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <!-- Report Controls -->
+                <div class="flex gap-4 mb-4">
+                    <input type="month" id="gstReportMonth" class="border rounded-lg px-3 py-2">
+                    <button onclick="generateGSTReport()" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        Generate Report
+                    </button>
+                    <button onclick="downloadGSTReport()" class="bg-green-600 text-white px-4 py-2 rounded-lg">
+                        Download Report
+                    </button>
+                </div>
+
+                <!-- Report Summary -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="font-semibold mb-2">Summary</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <p class="text-gray-600">Total GST Collected</p>
+                            <p class="text-xl font-bold" id="totalGSTCollected">₹0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Total GST Paid</p>
+                            <p class="text-xl font-bold" id="totalGSTPaid">₹0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Net GST Payable</p>
+                            <p class="text-xl font-bold" id="netGSTPayable">₹0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Total Transactions</p>
+                            <p class="text-xl font-bold" id="totalTransactions">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Reports -->
+                <div class="space-y-4">
+                    <!-- Outward Supplies -->
+                    <div>
+                        <h4 class="font-semibold mb-2">Outward Supplies (Sales)</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full" id="outwardSuppliesTable">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Party</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">GSTIN</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">GST</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Inward Supplies -->
+                    <div>
+                        <h4 class="font-semibold mb-2">Inward Supplies (Purchases)</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full" id="inwardSuppliesTable">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Party</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">GSTIN</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">GST</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Report Modal -->
+    <div id="salesReportModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white rounded-lg p-8 max-w-4xl w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">Sales Report</h3>
+                <button onclick="hideSalesReport()" class="text-gray-500 hover:text-gray-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-6">
+                <!-- Report Controls -->
+                <div class="flex gap-4">
+                    <select id="reportPeriod" class="border rounded-lg px-3 py-2" onchange="generateSalesReport()">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                    <input type="month" id="reportMonth" class="border rounded-lg px-3 py-2" onchange="generateSalesReport()">
+                </div>
+
+                <!-- Charts Container -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Sales Trend Chart (Bar) -->
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h4 class="font-semibold mb-4">Sales Trend</h4>
+                        <div class="h-80">
+                            <canvas id="salesTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Payment Distribution Pie Chart -->
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h4 class="font-semibold mb-4">Payment Distribution</h4>
+                        <div class="h-80">
+                            <canvas id="paymentStatusChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Type Distribution -->
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h4 class="font-semibold mb-4">Transaction Types</h4>
+                        <div class="h-80">
+                            <canvas id="transactionTypeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Comparison Pie -->
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h4 class="font-semibold mb-4">Monthly Sales Distribution</h4>
+                        <div class="h-80">
+                            <canvas id="monthlyDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h5 class="text-blue-600 font-semibold">Total Sales</h5>
+                        <p class="text-2xl font-bold" id="totalSales">₹0.00</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h5 class="text-green-600 font-semibold">Received Amount</h5>
+                        <p class="text-2xl font-bold" id="receivedAmount">₹0.00</p>
+                    </div>
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h5 class="text-yellow-600 font-semibold">Pending Amount</h5>
+                        <p class="text-2xl font-bold" id="pendingAmount">₹0.00</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h5 class="text-purple-600 font-semibold">Total Transactions</h5>
+                        <p class="text-2xl font-bold" id="totalTransactionsCount">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GST Advisor Modal -->
+    <div id="gstAdvisorModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white rounded-lg p-8 max-w-4xl w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">GST Optimization Advisor</h3>
+                <button onclick="hideGSTAdvisor()" class="text-gray-500 hover:text-gray-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-6">
+                <!-- Recommendations -->
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h4 class="font-semibold mb-4">Key Recommendations</h4>
+                    <div id="gstRecommendations" class="space-y-4">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Potential Savings -->
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="text-green-600 font-semibold">Potential GST Savings</h4>
+                    <p class="text-2xl font-bold" id="potentialSavings">₹0.00</p>
+                </div>
+
+                <!-- Compliance Checks -->
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h4 class="font-semibold mb-4">Compliance Status</h4>
+                    <div id="complianceChecks" class="space-y-2">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Input Credit Optimization -->
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h4 class="font-semibold mb-4">Input Credit Optimization</h4>
+                    <div id="inputCreditOptimization" class="space-y-2">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
